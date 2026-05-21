@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boundary Buddy</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      font-size: 48px;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2, h3 {
+      color: #333;
+    }
+
+    p {
+      position: relative;
+      z-index: 1;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .yes {
+      background: linear-gradient(135deg, #4caf50, #45a049);
+      color: white;
+    }
+
+    .yes:hover {
+      background: linear-gradient(135deg, #66bb6a, #66bb6a);
+    }
+
+    .no {
+      background: linear-gradient(135deg, #f44336, #da190b);
+      color: white;
+    }
+
+    .no:hover {
+      background: linear-gradient(135deg, #f55549, #e53935);
+    }
+
+    .history-section {
+      margin-top: 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      gap: 15px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #f5f5f5, #ffffff);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      flex: 1;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-box .number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #4caf50;
+    }
+
+    .stat-box .label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .calendar-container {
+      margin: 20px 0;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin: 15px 0;
+    }
+
+    .calendar-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .calendar-cell.yes {
+      background: #4caf50;
+      color: white;
+    }
+
+    .calendar-cell.no {
+      background: #f44336;
+      color: white;
+    }
+
+    .calendar-cell.empty {
+      background: transparent;
+      cursor: default;
+    }
+
+    .history-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin: 15px 0;
+    }
+
+    .history-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item.yes {
+      background: linear-gradient(135deg, #e8f5e9, #f1f8f6);
+      border-left: 4px solid #4caf50;
+    }
+
+    .history-item.no {
+      background: linear-gradient(135deg, #fff3e0, #fff8f0);
+      border-left: 4px solid #f44336;
+    }
+
+    .month-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+    }
+
+    .month-nav button {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+
+    .month-nav span {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .note-section {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .note-section.show {
+      display: block;
+    }
+
+    .note-section textarea {
+      width: 100%;
+      height: 80px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    .note-section button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .history-item .note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.03);
+      border-left: 3px solid #999;
+      border-radius: 2px;
+      font-style: italic;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #ffffff, #f8f9fa);
+      padding: 25px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+    }
+
+    .modal-content textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+      margin: 10px 0;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .achievements-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffc107 100%);
+      border-radius: 16px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .achievement {
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 32px;
+      opacity: 0.4;
+      transition: all 0.3s ease;
+    }
+
+    .achievement.unlocked {
+      opacity: 1;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+      transform: scale(1.1);
+    }
+
+    .achievement-title {
+      font-size: 10px;
+      color: #333;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+
+    .share-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffffff, #f8f9fa);
+      border-radius: 16px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .share-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .share-btn {
+      padding: 10px 15px;
+      font-size: 14px;
+      border: none;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .share-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .motivational-quote {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin-top: 20px;
+      font-size: 16px;
+      font-style: italic;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .challenge-banner {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f, #ff8787);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin: 20px auto;
+      max-width: 600px;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .milestone-popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ffffff, #f8f9fa);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+      animation: slideIn 0.5s ease-out;
+      max-width: 280px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .milestone-popup .emoji {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .milestone-popup h3 {
+      margin: 10px 0;
+      color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <h1>Boundary Buddy</h1>
+  <p>
+    <strong>Today's Date:</strong>
+    <span id="date"></span>
+  </p>
+
+  <div class="challenge-banner" id="challengeBanner"></div>
+
+  <h2>Did I hold my boundaries today?</h2>
+  <button class="yes" onclick="yesClick()">Yes 👍 I did</button>
+  <button class="no" onclick="noClick()">No 👎 Not today</button>
+
+  <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 8px; display: inline-block;">
+    <h3>🔥 Current Streak</h3>
+    <p style="font-size: 48px; margin: 10px 0; color: #4caf50;"><strong id="streak">0</strong></p>
+    <p style="color: #666;">consecutive days</p>
+  </div>
+
+  <p id="result" style="font-size: 18px; margin-top: 20px;"></p>
+
+  <div class="note-section" id="noteSection">
+    <h3>📝 Add a note for today:</h3>
+    <textarea id="noteInput" placeholder="What happened? How did you feel? What challenged you?"></textarea>
+    <button class="yes" onclick="saveNote()">Save Note</button>
+  </div>
+
+  <div class="motivational-quote" id="motivationalQuote"></div>
+
+  <div class="achievements-section">
+    <h2>🏆 Achievements</h2>
+    <div class="achievements-grid" id="achievementsGrid"></div>
+  </div>
+
+  <div class="share-section">
+    <h3>📢 Share Your Progress</h3>
+    <p>Inspire others to hold their boundaries!</p>
+    <div class="share-buttons">
+      <button class="share-btn" onclick="shareTwitter()">𝕏 Tweet</button>
+      <button class="share-btn" onclick="shareFacebook()">f Share</button>
+      <button class="share-btn" onclick="shareWhatsapp()">💬 WhatsApp</button>
+      <button class="share-btn" onclick="copyShareLink()">🔗 Copy Link</button>
+    </div>
+  </div>
+
+  <div id="noteModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalDate"></h3>
+      <textarea id="modalNoteInput" placeholder="Add or edit a note..."></textarea>
+      <div class="modal-buttons">
+        <button class="yes" onclick="saveModalNote()">Save</button>
+        <button class="no" onclick="closeNoteModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <h2>📊 History & Stats</h2>
+    
+    <div class="stats-container">
+      <div class="stat-box">
+        <div class="number" id="totalYes">0</div>
+        <div class="label">Days Held Boundaries</div>
+      </div>
+      <div class="stat-box">
+        <div class="number" id="totalNo">0</div>
+        <div class="label">Days Challenged</div>
+      </div>
+      <div class="stat-box">
+        <div class="number" id="successRate">0%</div>
+        <div class="label">Success Rate</div>
+      </div>
+    </div>
+
+    <div class="calendar-container">
+      <h3>📅 Calendar View</h3>
+      <div class="month-nav">
+        <button onclick="previousMonth()">← Previous</button>
+        <span id="monthYear"></span>
+        <button onclick="nextMonth()">Next →</button>
+      </div>
+      <div style="text-align: center; font-size: 12px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px;">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div>
+      <h3>📝 Recent Entries</h3>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <script>
+    let viewMonth = new Date();
+    let currentNoteDate = null;
+
+    const QUOTES = [
+      "Your boundaries are not walls, they're bridges to self-respect.",
+      "Setting boundaries is the first act of self-love.",
+      "You can't pour from an empty cup. Protect your energy.",
+      "Boundaries are where you end and other people begin.",
+      "The power to say 'no' is the power to say 'yes' to yourself.",
+      "Your peace is worth more than anyone's approval.",
+      "Strong boundaries = strong character.",
+      "You teach people how to treat you by the boundaries you set.",
+      "Respecting yourself means respecting your limits.",
+      "Every boundary crossed today makes tomorrow harder."
+    ];
+
+    const ACHIEVEMENTS = [
+      { name: "Starter", emoji: "🌱", streak: 1 },
+      { name: "Week Warrior", emoji: "💪", streak: 7 },
+      { name: "30-Day Hero", emoji: "🔥", streak: 30 },
+      { name: "Legend", emoji: "👑", streak: 100 },
+      { name: "Unbreakable", emoji: "💎", streak: 365 }
+    ];
+
+    const CHALLENGES = [
+      "7-Day Streak Challenge",
+      "No Excuses Week",
+      "Boundary Power Month",
+      "100-Day Transform"
+    ];
+
+    document.getElementById("date").textContent = new Date().toLocaleDateString();
+    updateChallengeBanner();
+    updateMotivationalQuote();
+
+    function updateChallengeBanner() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0}');
+      const streak = data.streak;
+      
+      let challenge = "";
+      if (streak < 7) {
+        challenge = `🎯 ${CHALLENGES[0]}: ${streak}/7 days complete!`;
+      } else if (streak < 30) {
+        challenge = `🎯 ${CHALLENGES[2]}: ${streak}/30 days complete!`;
+      } else if (streak < 100) {
+        challenge = `🎯 ${CHALLENGES[3]}: ${streak}/100 days complete!`;
+      } else {
+        challenge = `🌟 YOU'RE A LEGEND! ${streak} days! 🌟`;
+      }
+      
+      document.getElementById("challengeBanner").textContent = challenge;
+    }
+
+    function updateMotivationalQuote() {
+      const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+      document.getElementById("motivationalQuote").innerHTML = `"${quote}"`;
+    }
+
+    function loadStreak() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "achievements": []}');
+      const today = new Date().toDateString();
+      
+      if (data.lastDate !== today) {
+        const lastDate = data.lastDate ? new Date(data.lastDate) : null;
+        const todayDate = new Date();
+        
+        if (lastDate) {
+          const diffTime = todayDate - lastDate;
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays > 1) {
+            data.streak = 0;
+          }
+        }
+      }
+      
+      updateStreakDisplay(data.streak);
+      updateStats();
+      renderCalendar();
+      renderHistory();
+      renderAchievements(data.streak);
+      updateChallengeBanner();
+    }
+
+    function updateStreakDisplay(streak) {
+      document.getElementById("streak").textContent = streak;
+    }
+
+    function saveStreak(newStreak) {
+      const today = new Date().toDateString();
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "achievements": []}');
+      
+      data.streak = newStreak;
+      data.lastDate = today;
+      
+      localStorage.setItem("boundaryData", JSON.stringify(data));
+      updateStreakDisplay(newStreak);
+      checkMilestones(newStreak);
+      renderAchievements(newStreak);
+      updateChallengeBanner();
+    }
+
+    function checkMilestones(streak) {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"achievements": []}');
+      if (!data.achievements) data.achievements = [];
+      
+      const milestones = [7, 14, 30, 50, 100, 365];
+      if (milestones.includes(streak)) {
+        showMilestonePopup(streak);
+        if (!data.achievements.includes(streak)) {
+          data.achievements.push(streak);
+          localStorage.setItem("boundaryData", JSON.stringify(data));
+        }
+      }
+    }
+
+    function showMilestonePopup(streak) {
+      const popup = document.createElement("div");
+      popup.className = "milestone-popup";
+      
+      let emoji = "🔥";
+      let title = `${streak}-Day Streak!`;
+      
+      if (streak === 7) emoji = "💪";
+      if (streak === 30) emoji = "👑";
+      if (streak === 100) emoji = "💎";
+      if (streak === 365) emoji = "🌟";
+      
+      popup.innerHTML = `
+        <div class="emoji">${emoji}</div>
+        <h3>${title}</h3>
+        <p>You're unstoppable! Keep going!</p>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      setTimeout(() => {
+        popup.style.animation = "slideIn 0.5s ease-out reverse";
+        setTimeout(() => popup.remove(), 500);
+      }, 4000);
+    }
+
+    function renderAchievements(streak) {
+      const grid = document.getElementById("achievementsGrid");
+      grid.innerHTML = "";
+      
+      ACHIEVEMENTS.forEach(achievement => {
+        const div = document.createElement("div");
+        div.className = "achievement" + (streak >= achievement.streak ? " unlocked" : "");
+        div.innerHTML = `
+          <div>${achievement.emoji}</div>
+          <div class="achievement-title">${achievement.name}</div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function getCurrentStreak() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0}');
+      return data.streak;
+    }
+
+    function recordEntry(result) {
+      const today = new Date().toDateString();
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}}');
+      
+      data.history[today] = result;
+      localStorage.setItem("boundaryData", JSON.stringify(data));
+      
+      updateStats();
+      renderCalendar();
+      renderHistory();
+    }
+
+    function updateStats() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}}');
+      const history = data.history || {};
+      
+      const yesCount = Object.values(history).filter(v => v === 'yes').length;
+      const noCount = Object.values(history).filter(v => v === 'no').length;
+      const total = yesCount + noCount;
+      const rate = total > 0 ? Math.round((yesCount / total) * 100) : 0;
+      
+      document.getElementById("totalYes").textContent = yesCount;
+      document.getElementById("totalNo").textContent = noCount;
+      document.getElementById("successRate").textContent = rate + "%";
+    }
+
+    function renderCalendar() {
+      const year = viewMonth.getFullYear();
+      const month = viewMonth.getMonth();
+      
+      document.getElementById("monthYear").textContent = viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      const calendar = document.getElementById("calendarGrid");
+      calendar.innerHTML = "";
+      
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}, "notes": {}}');
+      const history = data.history || {};
+      
+      for (let i = 0; i < firstDay; i++) {
+        const cell = document.createElement("div");
+        cell.className = "calendar-cell empty";
+        calendar.appendChild(cell);
+      }
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = date.toDateString();
+        const entry = history[dateStr];
+        
+        const cell = document.createElement("div");
+        cell.className = "calendar-cell" + (entry ? " " + entry : "");
+        cell.textContent = day;
+        cell.style.cursor = entry ? "pointer" : "default";
+        
+        if (entry === 'yes') {
+          cell.title = "Held boundaries";
+        } else if (entry === 'no') {
+          cell.title = "Did not hold boundaries";
+        }
+        
+        if (entry) {
+          cell.onclick = () => openNoteModal(dateStr);
+        }
+        
+        calendar.appendChild(cell);
+      }
+    }
+
+    function renderHistory() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}, "notes": {}}');
+      const history = data.history || {};
+      const notes = data.notes || {};
+      
+      const entries = Object.entries(history)
+        .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+        .slice(0, 20);
+      
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = entries.length === 0 ? "<p style='color: #999; text-align: center;'>No entries yet</p>" : "";
+      
+      entries.forEach(([date, result]) => {
+        const item = document.createElement("div");
+        item.className = "history-item " + result;
+        item.style.cursor = "pointer";
+        
+        const note = notes[date];
+        let itemHTML = `
+          <div>
+            <span>${new Date(date).toLocaleDateString()}</span>
+            <span>${result === 'yes' ? '✅ Held boundaries' : '❌ Challenged'}</span>
+          </div>
+        `;
+        
+        if (note) {
+          itemHTML += `<div class="note">${note}</div>`;
+        }
+        
+        item.innerHTML = itemHTML;
+        item.onclick = () => openNoteModal(date);
+        historyList.appendChild(item);
+      });
+    }
+
+    function previousMonth() {
+      viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1);
+      renderCalendar();
+    }
+
+    function saveNote() {
+      if (!currentNoteDate) return;
+      
+      const note = document.getElementById("noteInput").value.trim();
+      if (!note) {
+        alert("Please enter a note or close this section.");
+        return;
+      }
+      
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"notes": {}}');
+      if (!data.notes) data.notes = {};
+      
+      data.notes[currentNoteDate] = note;
+      localStorage.setItem("boundaryData", JSON.stringify(data));
+      
+      document.getElementById("noteInput").value = "";
+      document.getElementById("noteSection").classList.remove("show");
+      currentNoteDate = null;
+      
+      renderHistory();
+    }
+
+    function openNoteModal(dateStr) {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"notes": {}}');
+      const notes = data.notes || {};
+      const note = notes[dateStr] || "";
+      
+      currentNoteDate = dateStr;
+      document.getElementById("modalDate").textContent = new Date(dateStr).toLocaleDateString();
+      document.getElementById("modalNoteInput").value = note;
+      document.getElementById("noteModal").classList.add("show");
+    }
+
+    function saveModalNote() {
+      if (!currentNoteDate) return;
+      
+      const note = document.getElementById("modalNoteInput").value.trim();
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"notes": {}}');
+      if (!data.notes) data.notes = {};
+      
+      if (note) {
+        data.notes[currentNoteDate] = note;
+      } else {
+        delete data.notes[currentNoteDate];
+      }
+      
+      localStorage.setItem("boundaryData", JSON.stringify(data));
+      closeNoteModal();
+      renderHistory();
+    }
+
+    function closeNoteModal() {
+      document.getElementById("noteModal").classList.remove("show");
+      currentNoteDate = null;
+    }
+
+    function shareTwitter() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0}');
+      const streak = data.streak;
+      const text = `I'm on a ${streak}-day streak with Boundary Buddy! 🔥 I'm learning to respect my boundaries and protect my peace. Join me! 💪 #BoundaryBuddy #SelfCare`;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function shareFacebook() {
+      const text = `I'm using Boundary Buddy to track and strengthen my personal boundaries! Join me on this journey. Check it out!`;
+      window.open(`https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function shareWhatsapp() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0}');
+      const streak = data.streak;
+      const text = `Check out Boundary Buddy! 🔥 I've been on a ${streak}-day streak learning to hold my boundaries. Let's support each other! 💪`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function copyShareLink() {
+      const text = "Check out Boundary Buddy - an app to track and strengthen your personal boundaries! https://boundary-buddy.app 🔥";
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Share link copied to clipboard!");
+      });
+    }
+
+    function yesClick() {
+      const currentStreak = getCurrentStreak();
+      const newStreak = currentStreak + 1;
+      saveStreak(newStreak);
+      recordEntry('yes');
+      
+      document.getElementById("result").innerHTML =
+        "✅ Great job! You're building consistency.";
+      document.getElementById("result").style.color = "green";
+      
+      currentNoteDate = new Date().toDateString();
+      document.getElementById("noteSection").classList.add("show");
+      document.getElementById("noteInput").value = "";
+      document.getElementById("noteInput").focus();
+    }
+
+    function noClick() {
+      saveStreak(0);
+      recordEntry('no');
+      
+      document.getElementById("result").innerHTML =
+        "It's okay. Progress isn't always linear. Try again tomorrow.";
+      document.getElementById("result").style.color = "#f57c00";
+      
+      currentNoteDate = new Date().toDateString();
+      document.getElementById("noteSection").classList.add("show");
+      document.getElementById("noteInput").value = "";
+      document.getElementById("noteInput").focus();
+    }
+
+    loadStreak();
+  </script>
+</body>
+</html>
