@@ -862,18 +862,18 @@
         const btn = document.createElement("button");
         btn.className = "category-btn";
         btn.innerHTML = `${cat.emoji}<br>${cat.name}`;
-        btn.onclick = () => selectCategory(cat.name);
+        btn.onclick = () => selectCategory(cat.name, btn);
         grid.appendChild(btn);
       });
     }
 
-    function selectCategory(categoryName) {
+    function selectCategory(categoryName, buttonElement) {
       selectedCategory = categoryName;
       
       document.querySelectorAll(".category-btn").forEach(btn => {
         btn.classList.remove("selected");
       });
-      event.target.closest(".category-btn").classList.add("selected");
+      buttonElement.classList.add("selected");
     }
 
     function loadStreak() {
@@ -1091,6 +1091,10 @@
       `;
 
       // Trends
+      const currentStreak = data.streak || 0;
+      const weakestArea = findWeakestCategory(categoryStats);
+      const strongestArea = findStrongestCategory(categoryStats);
+      
       const trends = document.getElementById("trendsSection");
       trends.innerHTML = `
         <div class="trend-item">
@@ -1109,16 +1113,16 @@
           <div class="progress-fill" style="width: ${rate}%"></div>
         </div>
         <div class="trend-item" style="margin-top: 10px;">
-          <div class="trend-label">Streak: ${getCurrentStreak()} days 🔥</div>
+          <div class="trend-label">Streak: ${currentStreak} days 🔥</div>
           <div class="trend-value"><strong>Keep going!</strong></div>
         </div>
         <div class="trend-item">
           <div class="trend-label">Most Challenging Area</div>
-          <div class="trend-value"><strong>${findWeakestCategory(categoryStats)}</strong></div>
+          <div class="trend-value"><strong>${weakestArea}</strong></div>
         </div>
         <div class="trend-item">
           <div class="trend-label">Strongest Area</div>
-          <div class="trend-value"><strong>${findStrongestCategory(categoryStats)}</strong></div>
+          <div class="trend-value"><strong>${strongestArea}</strong></div>
         </div>
       `;
     }
@@ -1302,7 +1306,12 @@
       
       const note = document.getElementById("noteInput").value.trim();
       if (!note) {
-        alert("Please enter a note or close this section.");
+        // Allow saving without note - just close the sections
+        document.getElementById("noteInput").value = "";
+        document.getElementById("noteSection").classList.remove("show");
+        document.getElementById("categorySelector").classList.remove("show");
+        currentNoteDate = null;
+        selectedCategory = null;
         return;
       }
       
@@ -1314,7 +1323,9 @@
       
       document.getElementById("noteInput").value = "";
       document.getElementById("noteSection").classList.remove("show");
+      document.getElementById("categorySelector").classList.remove("show");
       currentNoteDate = null;
+      selectedCategory = null;
       
       renderHistory();
     }
