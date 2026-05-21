@@ -167,9 +167,101 @@
       margin-top: 5px;
     }
 
-    .calendar-container {
+    .advanced-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
       margin: 20px 0;
     }
+
+    .stat-card {
+      background: linear-gradient(135deg, #f5f5f5, #ffffff);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card .emoji {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 8px 0;
+    }
+
+    .stat-card .title {
+      font-size: 11px;
+      color: #666;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .subtitle {
+      font-size: 10px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .trends-section {
+      background: linear-gradient(135deg, #f5f5f5, #ffffff);
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .trend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .trend-item:last-child {
+      border-bottom: none;
+    }
+
+    .trend-label {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .trend-value {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #eee;
+      border-radius: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4caf50, #8bc34a);
+      transition: width 0.3s ease;
+    }
+  </style>
 
     .calendar-grid {
       display: grid;
@@ -494,6 +586,94 @@
       margin: 10px 0;
       color: #4caf50;
     }
+
+    .category-selector {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .category-selector.show {
+      display: block;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .category-btn {
+      padding: 12px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .category-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-btn.selected {
+      border-color: #4caf50;
+      background: #4caf50;
+      color: white;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .category-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .category-stat {
+      background: linear-gradient(135deg, #f5f5f5, #ffffff);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .category-stat .emoji {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .category-stat .count {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4caf50;
+    }
+
+    .category-stat .label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .history-item .category-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -516,6 +696,11 @@
   </div>
 
   <p id="result" style="font-size: 18px; margin-top: 20px;"></p>
+
+  <div class="category-selector" id="categorySelector">
+    <h3>📂 Which area of your life?</h3>
+    <div class="category-grid" id="categoryGrid"></div>
+  </div>
 
   <div class="note-section" id="noteSection">
     <h3>📝 Add a note for today:</h3>
@@ -570,6 +755,15 @@
       </div>
     </div>
 
+    <h3>📂 By Category</h3>
+    <div class="category-stats" id="categoryStats"></div>
+
+    <h3>📈 Advanced Statistics</h3>
+    <div class="advanced-stats" id="advancedStats"></div>
+
+    <h3>📊 Insights & Trends</h3>
+    <div class="trends-section" id="trendsSection"></div>
+
     <div class="calendar-container">
       <h3>📅 Calendar View</h3>
       <div class="month-nav">
@@ -592,6 +786,7 @@
   <script>
     let viewMonth = new Date();
     let currentNoteDate = null;
+    let selectedCategory = null;
 
     const QUOTES = [
       "Your boundaries are not walls, they're bridges to self-respect.",
@@ -621,6 +816,17 @@
       "100-Day Transform"
     ];
 
+    const CATEGORIES = [
+      { name: "Family", emoji: "👨‍👩‍👧‍👦" },
+      { name: "Work", emoji: "💼" },
+      { name: "Personal", emoji: "🧘" },
+      { name: "Friends", emoji: "👥" },
+      { name: "Romantic", emoji: "💕" },
+      { name: "Health", emoji: "❤️" },
+      { name: "Social", emoji: "📱" },
+      { name: "Other", emoji: "🎯" }
+    ];
+
     document.getElementById("date").textContent = new Date().toLocaleDateString();
     updateChallengeBanner();
     updateMotivationalQuote();
@@ -648,8 +854,30 @@
       document.getElementById("motivationalQuote").innerHTML = `"${quote}"`;
     }
 
+    function renderCategorySelector() {
+      const grid = document.getElementById("categoryGrid");
+      grid.innerHTML = "";
+      
+      CATEGORIES.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "category-btn";
+        btn.innerHTML = `${cat.emoji}<br>${cat.name}`;
+        btn.onclick = () => selectCategory(cat.name);
+        grid.appendChild(btn);
+      });
+    }
+
+    function selectCategory(categoryName) {
+      selectedCategory = categoryName;
+      
+      document.querySelectorAll(".category-btn").forEach(btn => {
+        btn.classList.remove("selected");
+      });
+      event.target.closest(".category-btn").classList.add("selected");
+    }
+
     function loadStreak() {
-      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "achievements": []}');
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "achievements": [], "categories": {}}');
       const today = new Date().toDateString();
       
       if (data.lastDate !== today) {
@@ -672,6 +900,7 @@
       renderHistory();
       renderAchievements(data.streak);
       updateChallengeBanner();
+      renderCategorySelector();
     }
 
     function updateStreakDisplay(streak) {
@@ -680,7 +909,7 @@
 
     function saveStreak(newStreak) {
       const today = new Date().toDateString();
-      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "achievements": []}');
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "achievements": [], "categories": {}}');
       
       data.streak = newStreak;
       data.lastDate = today;
@@ -754,9 +983,14 @@
 
     function recordEntry(result) {
       const today = new Date().toDateString();
-      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}}');
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"streak": 0, "lastDate": null, "history": {}, "notes": {}, "categories": {}}');
       
       data.history[today] = result;
+      if (selectedCategory) {
+        if (!data.categories) data.categories = {};
+        data.categories[today] = selectedCategory;
+      }
+      
       localStorage.setItem("boundaryData", JSON.stringify(data));
       
       updateStats();
@@ -765,8 +999,9 @@
     }
 
     function updateStats() {
-      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}}');
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}, "categories": {}}');
       const history = data.history || {};
+      const categories = data.categories || {};
       
       const yesCount = Object.values(history).filter(v => v === 'yes').length;
       const noCount = Object.values(history).filter(v => v === 'no').length;
@@ -776,6 +1011,190 @@
       document.getElementById("totalYes").textContent = yesCount;
       document.getElementById("totalNo").textContent = noCount;
       document.getElementById("successRate").textContent = rate + "%";
+      
+      // Update category stats
+      const categoryStats = {};
+      CATEGORIES.forEach(cat => {
+        categoryStats[cat.name] = { yes: 0, total: 0, emoji: cat.emoji };
+      });
+      
+      Object.entries(history).forEach(([date, result]) => {
+        const cat = categories[date] || "Other";
+        if (categoryStats[cat]) {
+          categoryStats[cat].total++;
+          if (result === 'yes') categoryStats[cat].yes++;
+        }
+      });
+      
+      const statsContainer = document.getElementById("categoryStats");
+      statsContainer.innerHTML = "";
+      
+      Object.entries(categoryStats).forEach(([name, stats]) => {
+        if (stats.total > 0) {
+          const rate = Math.round((stats.yes / stats.total) * 100);
+          const div = document.createElement("div");
+          div.className = "category-stat";
+          div.innerHTML = `
+            <div class="emoji">${stats.emoji}</div>
+            <div class="label">${name}</div>
+            <div class="count">${stats.yes}/${stats.total}</div>
+            <div class="label">${rate}%</div>
+          `;
+          statsContainer.appendChild(div);
+        }
+      });
+
+      // Advanced statistics
+      const bestStreak = calculateBestStreak(history);
+      const thisWeek = calculatePeriodStats(history, 7);
+      const thisMonth = calculatePeriodStats(history, 30);
+      const avgPerWeek = Math.round(yesCount / (Math.max(1, Math.floor(total / 7))));
+      
+      const advancedStats = document.getElementById("advancedStats");
+      advancedStats.innerHTML = `
+        <div class="stat-card">
+          <div class="emoji">🎯</div>
+          <div class="value">${total}</div>
+          <div class="title">Total Days</div>
+          <div class="subtitle">Tracked</div>
+        </div>
+        <div class="stat-card">
+          <div class="emoji">👑</div>
+          <div class="value">${bestStreak}</div>
+          <div class="title">Best Streak</div>
+          <div class="subtitle">Days</div>
+        </div>
+        <div class="stat-card">
+          <div class="emoji">📅</div>
+          <div class="value">${thisWeek}/${Math.min(7, daysThisWeek())}</div>
+          <div class="title">This Week</div>
+          <div class="subtitle">Success</div>
+        </div>
+        <div class="stat-card">
+          <div class="emoji">📊</div>
+          <div class="value">${thisMonth}/30</div>
+          <div class="title">This Month</div>
+          <div class="subtitle">Success</div>
+        </div>
+        <div class="stat-card">
+          <div class="emoji">⚡</div>
+          <div class="value">${avgPerWeek}</div>
+          <div class="title">Avg Per Week</div>
+          <div class="subtitle">Success Days</div>
+        </div>
+        <div class="stat-card">
+          <div class="emoji">📈</div>
+          <div class="value">${rate}%</div>
+          <div class="title">Overall Rate</div>
+          <div class="subtitle">Success</div>
+        </div>
+      `;
+
+      // Trends
+      const trends = document.getElementById("trendsSection");
+      trends.innerHTML = `
+        <div class="trend-item">
+          <div class="trend-label">Total Entries</div>
+          <div class="trend-value"><strong>${total}</strong> days</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-label">Held Boundaries</div>
+          <div class="trend-value"><strong>${yesCount}</strong> times</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-label">Boundaries Challenged</div>
+          <div class="trend-value"><strong>${noCount}</strong> times</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${rate}%"></div>
+        </div>
+        <div class="trend-item" style="margin-top: 10px;">
+          <div class="trend-label">Streak: ${getCurrentStreak()} days 🔥</div>
+          <div class="trend-value"><strong>Keep going!</strong></div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-label">Most Challenging Area</div>
+          <div class="trend-value"><strong>${findWeakestCategory(categoryStats)}</strong></div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-label">Strongest Area</div>
+          <div class="trend-value"><strong>${findStrongestCategory(categoryStats)}</strong></div>
+        </div>
+      `;
+    }
+
+    function calculateBestStreak(history) {
+      const dates = Object.keys(history).map(d => new Date(d)).sort((a, b) => a - b);
+      if (dates.length === 0) return 0;
+      
+      let maxStreak = 0;
+      let currentStreak = 0;
+      
+      for (let i = 0; i < dates.length; i++) {
+        const dateStr = dates[i].toDateString();
+        if (history[dateStr] === 'yes') {
+          currentStreak++;
+          maxStreak = Math.max(maxStreak, currentStreak);
+        } else {
+          currentStreak = 0;
+        }
+      }
+      
+      return maxStreak;
+    }
+
+    function calculatePeriodStats(history, days) {
+      const now = new Date();
+      const periodStart = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      
+      return Object.entries(history)
+        .filter(([date, result]) => {
+          const d = new Date(date);
+          return d >= periodStart && result === 'yes';
+        })
+        .length;
+    }
+
+    function daysThisWeek() {
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(now.getDate() - now.getDay());
+      const count = Math.ceil((now - start) / (1000 * 60 * 60 * 24)) + 1;
+      return Math.min(count, 7);
+    }
+
+    function findWeakestCategory(categoryStats) {
+      let weakest = "N/A";
+      let lowestRate = 100;
+      
+      Object.entries(categoryStats).forEach(([name, stats]) => {
+        if (stats.total > 0) {
+          const rate = Math.round((stats.yes / stats.total) * 100);
+          if (rate < lowestRate) {
+            lowestRate = rate;
+            weakest = name;
+          }
+        }
+      });
+      
+      return weakest;
+    }
+
+    function findStrongestCategory(categoryStats) {
+      let strongest = "N/A";
+      let highestRate = -1;
+      
+      Object.entries(categoryStats).forEach(([name, stats]) => {
+        if (stats.total > 0) {
+          const rate = Math.round((stats.yes / stats.total) * 100);
+          if (rate > highestRate) {
+            highestRate = rate;
+            strongest = name;
+          }
+        }
+      });
+      
+      return strongest;
     }
 
     function renderCalendar() {
@@ -824,9 +1243,10 @@
     }
 
     function renderHistory() {
-      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}, "notes": {}}');
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"history": {}, "notes": {}, "categories": {}}');
       const history = data.history || {};
       const notes = data.notes || {};
+      const categories = data.categories || {};
       
       const entries = Object.entries(history)
         .sort((a, b) => new Date(b[0]) - new Date(a[0]))
@@ -841,9 +1261,18 @@
         item.style.cursor = "pointer";
         
         const note = notes[date];
+        const category = categories[date];
+        const catObj = CATEGORIES.find(c => c.name === category);
+        
         let itemHTML = `
           <div>
-            <span>${new Date(date).toLocaleDateString()}</span>
+            <span>${new Date(date).toLocaleDateString()}</span>`;
+        
+        if (category && catObj) {
+          itemHTML += `<span class="category-badge">${catObj.emoji} ${category}</span>`;
+        }
+        
+        itemHTML += `
             <span>${result === 'yes' ? '✅ Held boundaries' : '❌ Challenged'}</span>
           </div>
         `;
@@ -960,6 +1389,10 @@
         "✅ Great job! You're building consistency.";
       document.getElementById("result").style.color = "green";
       
+      selectedCategory = null;
+      document.getElementById("categorySelector").classList.add("show");
+      renderCategorySelector();
+      
       currentNoteDate = new Date().toDateString();
       document.getElementById("noteSection").classList.add("show");
       document.getElementById("noteInput").value = "";
@@ -973,6 +1406,10 @@
       document.getElementById("result").innerHTML =
         "It's okay. Progress isn't always linear. Try again tomorrow.";
       document.getElementById("result").style.color = "#f57c00";
+      
+      selectedCategory = null;
+      document.getElementById("categorySelector").classList.add("show");
+      renderCategorySelector();
       
       currentNoteDate = new Date().toDateString();
       document.getElementById("noteSection").classList.add("show");
