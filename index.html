@@ -261,6 +261,139 @@
       background: linear-gradient(90deg, #4caf50, #8bc34a);
       transition: width 0.3s ease;
     }
+
+    .premium-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 30px;
+      box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .premium-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .premium-title {
+      font-size: 28px;
+      margin: 12px 0;
+      font-weight: bold;
+    }
+
+    .premium-price {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .premium-price small {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .premium-features {
+      text-align: left;
+      margin: 20px 0;
+      display: inline-block;
+    }
+
+    .premium-features li {
+      list-style: none;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .premium-features li:before {
+      content: "✓ ";
+      font-weight: bold;
+      margin-right: 8px;
+      color: #4ade80;
+    }
+
+    .upgrade-btn {
+      background: white;
+      color: #667eea;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.3s;
+    }
+
+    .upgrade-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .referral-section {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 15px;
+      color: #333;
+    }
+
+    .referral-code {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-weight: bold;
+      color: #667eea;
+      user-select: all;
+    }
+
+    .copy-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .limited-feature {
+      position: relative;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .limited-feature::after {
+      content: "💎 Premium Only";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(102, 126, 234, 0.95);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+      z-index: 100;
+    }
   </style>
 
     .calendar-grid {
@@ -726,6 +859,32 @@
     </div>
   </div>
 
+  <div class="premium-section" id="premiumSection">
+    <div class="premium-badge">💎 PREMIUM</div>
+    <h3 class="premium-title">Unlock Advanced Features</h3>
+    <div class="premium-price">$4.99<small>/month</small></div>
+    
+    <ul class="premium-features">
+      <li>Advanced insights & trends</li>
+      <li>Data export (CSV, PDF)</li>
+      <li>Weekly email reports</li>
+      <li>Custom goals & milestones</li>
+      <li>Dark mode</li>
+      <li>Ad-free experience</li>
+      <li>Priority support</li>
+    </ul>
+
+    <button class="upgrade-btn" onclick="upgradePremium()">Upgrade to Premium</button>
+
+    <div class="referral-section">
+      <h4>🎁 Earn Free Premium</h4>
+      <p>Invite friends and get 1 free month for each friend who signs up!</p>
+      <p style="font-size: 12px; opacity: 0.8;">Your referral code:</p>
+      <div class="referral-code" id="referralCode">LOADING...</div>
+      <button class="copy-btn" onclick="copyReferralCode()">Copy Code</button>
+    </div>
+  </div>
+
   <div id="noteModal" class="modal">
     <div class="modal-content">
       <h3 id="modalDate"></h3>
@@ -854,6 +1013,73 @@
       document.getElementById("motivationalQuote").innerHTML = `"${quote}"`;
     }
 
+    // Premium & Monetization Functions
+    function initPremium() {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"isPremium": false, "referralCode": ""}');
+      
+      if (!data.referralCode) {
+        data.referralCode = generateReferralCode();
+        localStorage.setItem("boundaryData", JSON.stringify(data));
+      }
+      
+      document.getElementById("referralCode").textContent = data.referralCode;
+      updatePremiumUI(data.isPremium);
+    }
+
+    function generateReferralCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function upgradePremium() {
+      // In production, this would redirect to Stripe checkout
+      // For now, we'll simulate a purchase
+      if (confirm("Redirect to Stripe payment? (Demo mode)")) {
+        const data = JSON.parse(localStorage.getItem("boundaryData") || '{"isPremium": false}');
+        data.isPremium = true;
+        data.premiumExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        localStorage.setItem("boundaryData", JSON.stringify(data));
+        
+        updatePremiumUI(true);
+        alert("✅ Premium activated! Enjoy all features.");
+      }
+      // Production: Use Stripe.js here
+      // window.location.href = 'https://checkout.stripe.com/pay/...';
+    }
+
+    function updatePremiumUI(isPremium) {
+      const premiumSection = document.getElementById("premiumSection");
+      if (isPremium) {
+        premiumSection.innerHTML = `
+          <div class="premium-badge">💎 PREMIUM MEMBER</div>
+          <h3 class="premium-title">You're all set!</h3>
+          <p style="color: #4ade80; font-size: 16px; font-weight: bold;">✓ Advanced insights unlocked</p>
+          <button class="upgrade-btn" onclick="alert('Manage subscription in settings')">Manage Subscription</button>
+        `;
+      }
+    }
+
+    function copyReferralCode() {
+      const code = document.getElementById("referralCode").textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert(`Referral code copied: ${code}\n\nShare to earn free premium!`);
+      });
+    }
+
+    function enablePremiumFeature(featureName) {
+      const data = JSON.parse(localStorage.getItem("boundaryData") || '{"isPremium": false}');
+      if (!data.isPremium) {
+        alert(`💎 ${featureName} is a Premium feature!\n\nUpgrade to unlock this feature.`);
+        document.getElementById("premiumSection").scrollIntoView({ behavior: 'smooth' });
+        return false;
+      }
+      return true;
+    }
+
     function renderCategorySelector() {
       const grid = document.getElementById("categoryGrid");
       grid.innerHTML = "";
@@ -901,6 +1127,7 @@
       renderAchievements(data.streak);
       updateChallengeBanner();
       renderCategorySelector();
+      initPremium();
     }
 
     function updateStreakDisplay(streak) {
