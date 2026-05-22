@@ -1,10 +1,5 @@
 {
   "name": "boundary-buddy",
   "buildCommand": "echo 'No build needed'",
-  "outputDirectory": "./",
-  "env": {
-    "STRIPE_PUBLIC_KEY": {
-      "description": "Stripe public key for payments"
-    }
-  }
+  "outputDirectory": "./"
 }
